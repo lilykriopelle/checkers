@@ -38,6 +38,10 @@ class Board
     puts render
   end
 
+  def pieces(color)
+    @grid.flatten.compact.select{|piece| piece.color == color}
+  end
+
   def win?(color)
     @grid.flatten.compact.none?{|piece| piece.color == other_color(color)}
   end

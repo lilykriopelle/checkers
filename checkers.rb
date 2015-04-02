@@ -27,7 +27,13 @@ class Checkers
         @board.display
         take_turn(player)
       rescue IOError => e
-        puts "#{e.message}.  Try again."
+        puts "#{e.message}  Try again."
+        retry
+      rescue InvalidMoveError => e
+        puts "#{e.message}  Try again."
+        retry
+      rescue ForcedJumpError => e
+        puts "#{e.message}  Try again."
         retry
       end
 

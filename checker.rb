@@ -1,6 +1,7 @@
 # coding: utf-8
 
 class InvalidMoveError < StandardError; end
+class ForcedJumpError < StandardError; end
 
 class Checker
   attr_accessor :color, :position, :board, :king
@@ -19,8 +20,10 @@ class Checker
   end
 
   def perform_moves(moves)
-    if valid_move_seq?(moves)
+    if valid_move_seq?(moves) == "true"
       perform_moves!(moves)
+    elsif valid_move_seq?(moves) == "fme"
+      raise ForcedJumpError.new "You are forced to jump."
     else
       raise InvalidMoveError.new "Invalid move."
     end
@@ -30,10 +33,12 @@ class Checker
     piece_clone = board.dup[position]
     begin
       piece_clone.perform_moves!(sequence)
-    rescue InvalidMoveError => e
-      false
+    rescue InvalidMoveError
+      "ime"
+    rescue ForcedJumpError
+      "fme"
     else
-      true
+      "true"
     end
   end
 
@@ -42,14 +47,18 @@ class Checker
     num_moves = sequence.size
     target = sequence.shift
 
-    if num_moves == 1
-      unless (perform_slide(target) || perform_jump(target))
-        raise InvalidMoveError.new "Invalid move."
-      end
+    if board.pieces(color).any? {|piece| piece.valid_jumps.count > 0}
+      raise ForcedJumpError.new "Forced to jump." if valid_slides.include?(target)
     else
-      until target.nil?
-        raise InvalidMoveError.new "Invalid move." unless perform_jump(target)
-        target = sequence.shift
+      if num_moves == 1
+        unless (perform_slide(target) || perform_jump(target))
+          raise InvalidMoveError.new "Invalid move."
+        end
+      else
+        until target.nil?
+          raise InvalidMoveError.new "Invalid move." unless perform_jump(target)
+          target = sequence.shift
+        end
       end
     end
   end
@@ -91,7 +100,7 @@ class Checker
   end
 
   def valid_slides
-    diffs = get_slide_diffs 
+    diffs = get_slide_diffs
     diffs.map{ |d_row, d_col| [row + d_row, col + d_col] }
          .select{|new_pos| board.in_bounds?(new_pos)}
          .reject{|new_pos| !board[new_pos].nil?}
@@ -101,14 +110,16 @@ class Checker
     reachable_jumps.select{|jump| board[jump].nil?}
   end
 
+  require 'byebug'
   def reachable_jumps
     diffs = get_jump_diffs
-    diffs.reject{|dir| adjacent_square_not_occupied_by_evemy(dir) }
+    diffs.reject{|dir| adjacent_square_not_occupied_by_enemy(dir) }
          .map { |(d_row, d_col)| [row+d_row, col+d_col] }
          .select {|new_pos| board.in_bounds?(new_pos)}
   end
 
-  def adjacent_square_not_occupied_by_evemy(dir)
+  def adjacent_square_not_occupied_by_enemy(dir)
+    return false unless board.in_bounds?([row + dir.first, col + dir.last])
     board[adjacent_square(dir)].nil? || !enemy?(board[adjacent_square(dir)])
   end
 
