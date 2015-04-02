@@ -3,6 +3,7 @@
 class InvalidMoveError < StandardError; end
 class ForcedJumpError < StandardError; end
 
+
 class Checker
   attr_accessor :color, :position, :board, :king
 
@@ -20,12 +21,14 @@ class Checker
   end
 
   def perform_moves(moves)
-    if valid_move_seq?(moves) == "true"
-      perform_moves!(moves)
-    elsif valid_move_seq?(moves) == "fme"
-      raise ForcedJumpError.new "You are forced to jump."
-    else
+    move_error = valid_move_seq?(moves)
+
+    if move_error.is_a?(InvalidMoveError)
       raise InvalidMoveError.new "Invalid move."
+    elsif move_error.is_a?(ForcedJumpError)
+      raise ForcedJumpError.new "Forced to jump."
+    else
+      perform_moves!(moves)
     end
   end
 
@@ -33,12 +36,12 @@ class Checker
     piece_clone = board.dup[position]
     begin
       piece_clone.perform_moves!(sequence)
-    rescue InvalidMoveError
-      "ime"
-    rescue ForcedJumpError
-      "fme"
+    rescue InvalidMoveError => e
+      e
+    rescue ForcedJumpError => e
+      e
     else
-      "true"
+      true
     end
   end
 
@@ -49,6 +52,7 @@ class Checker
 
     if board.pieces(color).any? {|piece| piece.valid_jumps.count > 0}
       raise ForcedJumpError.new "Forced to jump." if valid_slides.include?(target)
+      perform_jump(target)
     else
       if num_moves == 1
         unless (perform_slide(target) || perform_jump(target))

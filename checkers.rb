@@ -36,7 +36,6 @@ class Checkers
         puts "#{e.message}  Try again."
         retry
       end
-
       break if @board.win?(player)
     end
   end
