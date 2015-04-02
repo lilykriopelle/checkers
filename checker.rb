@@ -16,41 +16,36 @@ class Checker
   end
 
   def slide(target)
-
-    #return true if sliding to target is valid, false otherwise
+    slides.include?(target)
   end
 
   def jump(target)
-    #return true if sliding to target is valid, false otherwise
-  end
-
-
-  # MOVE TO BOARD
-  def in_bounds(pos)
-    pos.first.between?(0,7) && pos.last.between?(0,7)
+    jumps.include?(target)
   end
 
   # TO DO: reject if spot is occupied
-  def slides
+  def valid_slides
     diffs = (color == :white ? SLIDES_DOWN : SLIDES_UP)
     diffs.map { |d_row, d_col| [row+d_row, col+d_col] }
-         .select {|new_pos| in_bounds(new_pos)}
+         .select {|new_pos| board.in_bounds(new_pos)}
+         .select{|jump| board[jump].nil?}
   end
+
+  def valid_jumps
+    reachable_jumps.select{|jump| board[jump].nil?}
+  end
+
 
   # TO DO - reject jumps if space one away isn't occupied
-  # TO DO - reject jumping onto occupied spaces
-  def jumps
+  def reachable_jumps
     diffs = (color == :white ? JUMPS_DOWN : JUMPS_UP)
     diffs.map { |d_row, d_col| [row+d_row, col+d_col] }
-         .select {|new_pos| in_bounds(new_pos)}
+         .select {|new_pos| board.in_bounds(new_pos)}
   end
 
-  def inspect
-    render
-  end
-
+  # TO DO: render kings
   def render
-    color == :white ? "w" : "b"  
+    color == :white ? "w" : "b"
     #symbols[color]
   end
 
@@ -72,7 +67,11 @@ class Checker
   end
 
   def maybe_promote
+    king = true if at_last_row
+  end
 
+  def at_last_row
+    color == :white && row == 7 || color == :black && row == 0
   end
 
   def row

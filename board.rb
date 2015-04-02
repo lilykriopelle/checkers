@@ -49,6 +49,11 @@ class Board
     render
   end
 
+  # MOVE TO BOARD
+  def in_bounds(pos)
+    pos.first.between?(0,7) && pos.last.between?(0,7)
+  end
+
   # def render
   #    background = :gray
   #    nums = ("1".."8").to_a
