@@ -65,15 +65,15 @@ class Board
     end
 
     def render
-       background = :gray
+       background = :magenta
        nums = ("1".."8").to_a
 
        "   " + ('a'..'h').to_a.join("  ") + "\n" +
        @grid.map do |row|
-         background == :white ? background = :gray : background = :white
+         background == :white ? background = :magenta : background = :white
 
          (nums.shift + " ") + row.map do |piece|
-           background == :white ? background = :gray : background = :white
+           background == :white ? background = :magenta : background = :white
 
            if piece.nil?
              ("   ").colorize(:background => background)
