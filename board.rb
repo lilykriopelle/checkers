@@ -2,9 +2,9 @@
 
 class Board
 
-  def initialize()
+  def initialize(set_up = true)
     @grid = Array.new(8){Array.new(8)}
-    place_pieces
+    place_pieces if set_up
   end
 
   def place_pieces
@@ -20,7 +20,7 @@ class Board
   def alternate_pieces(row, color)
     (0..7).each do |col|
       if (row.even? && col.odd?) || (row.odd? && col.even?)
-        self[[row,col]] = Checker.new(self, color, [row,col])
+        Checker.new(self, color, [row,col])
       end
     end
   end
@@ -38,8 +38,12 @@ class Board
   end
 
   def render
+
+    nums = ("0".."7").to_a
+
+    "   " + nums.join("  ") + "\n" +
     @grid.map do |row|
-       row.map do |piece|
+        nums.shift + " " + row.map do |piece|
          if piece.nil?
            " _ "
          else
@@ -55,6 +59,16 @@ class Board
 
   def in_bounds?(pos)
     pos.first.between?(0,7) && pos.last.between?(0,7)
+  end
+
+  def dup
+    new_board = Board.new(false)
+
+    @grid.flatten.compact.each do |piece|
+      Checker.new(new_board, piece.color, piece.position, piece.king)
+    end
+
+    new_board
   end
 
   # def render

@@ -13,30 +13,64 @@ class Checker
     @color = color
     @position = position
     @king = king
+    board[[row,col]] = self
+  end
+
+  def valid_move_seq?
+    
+
+  end
+
+  def perform_moves!(sequence)
+    num_moves = sequence.size
+    target = sequence.shift
+    moved = true
+
+    if num_moves == 1
+      moved = (perform_slide(target) || perform_jump(target))
+    else
+      until target.nil? || !moved
+        raise IOError unless perform_jump(target)
+        target = sequence.shift
+      end
+    end
+    moved
   end
 
   def perform_slide(target)
-    valid_move = valid_slides.include?(target)
-    if valid_move
-      old_pos = position
-      self.position = target
-      self.board[old_pos] = nil
-      self.board[position] = self
+    is_valid_move = valid_slides.include?(target)
+    if is_valid_move
+      report_new_pos_to_board(target)
     end
     maybe_promote
 
-    valid_move
+    is_valid_move
   end
 
   def perform_jump(target)
-    valid_move = valid_jumps.include?(target)
-    if valid_move
-      position, board[position] = target, nil
-      # TODO remove jumped piece
+    is_valid_move = valid_jumps.include?(target)
+    if is_valid_move
+      remove_jumped_piece(target)
+      report_new_pos_to_board(target)
     end
     maybe_promote
 
-    valid_move
+    is_valid_move
+  end
+
+  def king?
+    @king
+  end
+
+  def remove_jumped_piece(jump)
+    self.board[[row + (jump.first - row)/2, col + (jump.last - col)/2]] = nil
+  end
+
+  def report_new_pos_to_board(new_pos)
+    old_pos = position
+    self.position = new_pos
+    self.board[old_pos] = nil
+    self.board[position] = self
   end
 
   def valid_slides
@@ -81,10 +115,10 @@ class Checker
   end
 
   def maybe_promote
-    king = true if at_last_row
+    king = true if at_last_row?
   end
 
-  def at_last_row
+  def at_last_row?
     color == :white && row == 7 || color == :black && row == 0
   end
 
@@ -95,5 +129,4 @@ class Checker
   def col
     position.last
   end
-
 end
