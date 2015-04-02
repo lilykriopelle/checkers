@@ -1,4 +1,5 @@
 require 'colorize'
+require_relative 'checker.rb'
 
 class Board
 
@@ -37,22 +38,6 @@ class Board
     puts render
   end
 
-  # def render
-  #
-  #   nums = ("1".."8").to_a
-  #   letts = ("a".."h").to_a
-  #   "   " + letts.join("  ") + "\n" +
-  #   @grid.map do |row|
-  #       nums.shift + " " + row.map do |piece|
-  #        if piece.nil?
-  #          " _ "
-  #        else
-  #          " #{piece.render} "
-  #        end
-  #      end.join("")
-  #    end.join("\n")
-  # end
-
   def win?(color)
     @grid.flatten.compact.none?{|piece| piece.color == other_color(color)}
   end
@@ -71,7 +56,6 @@ class Board
 
   def dup
     new_board = Board.new(false)
-
     @grid.flatten.compact.each do |piece|
       Checker.new(new_board, piece.color, piece.position, piece.king)
     end

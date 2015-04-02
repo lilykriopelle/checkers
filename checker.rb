@@ -30,10 +30,10 @@ class Checker
     piece_clone = board.dup[position]
     begin
       piece_clone.perform_moves!(sequence)
-    rescue
-      return false
+    rescue InvalidMoveError => e
+      false
     else
-      return true
+      true
     end
   end
 
@@ -43,13 +43,12 @@ class Checker
     target = sequence.shift
 
     if num_moves == 1
-
       unless (perform_slide(target) || perform_jump(target))
-        raise InvalidMoveError.new "Invalid move"
+        raise InvalidMoveError.new "Invalid move."
       end
     else
       until target.nil?
-        raise InvalidMoveError.new "Invalid move" unless perform_jump(target)
+        raise InvalidMoveError.new "Invalid move." unless perform_jump(target)
         target = sequence.shift
       end
     end
@@ -92,7 +91,7 @@ class Checker
   end
 
   def valid_slides
-    diffs = get_slide_diffs #(color == :white ? SLIDES_DOWN : SLIDES_UP)
+    diffs = get_slide_diffs 
     diffs.map{ |d_row, d_col| [row + d_row, col + d_col] }
          .select{|new_pos| board.in_bounds?(new_pos)}
          .reject{|new_pos| !board[new_pos].nil?}
@@ -103,7 +102,7 @@ class Checker
   end
 
   def reachable_jumps
-    diffs = get_jump_diffs #(color == :white ? JUMPS_DOWN : JUMPS_UP)
+    diffs = get_jump_diffs
     diffs.reject{|dir| adjacent_square_not_occupied_by_evemy(dir) }
          .map { |(d_row, d_col)| [row+d_row, col+d_col] }
          .select {|new_pos| board.in_bounds?(new_pos)}

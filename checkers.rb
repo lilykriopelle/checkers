@@ -1,3 +1,5 @@
+require_relative 'board.rb'
+
 class Checkers
 
   PLAYERS = [:white, :black]
@@ -20,23 +22,30 @@ class Checkers
   def play
 
     PLAYERS.cycle do |player|
-      @board.display
-      take_turn(player)
+
+      begin
+        @board.display
+        take_turn(player)
+      rescue IOError => e
+        puts "#{e.message}.  Try again."
+        retry
+      end
+
       break if @board.win?(player)
     end
   end
 
   def take_turn(color)
-    moves = get_sequence
+    moves = get_sequence(color)
     checker = @board[moves.shift]
-
-    raise IOError.new "That's not your piece" unless checker.color == color
+    raise IOError.new "That's not your piece." unless checker.color == color
 
     checker.perform_moves(moves)
   end
 
-  def get_sequence
-    puts "Enter a move sequence, starting with the location of the piece you want to move."
+  def get_sequence(color)
+    puts "\n#{color.to_s.capitalize}'s turn."
+    puts "Enter a sequence of moves, starting with the location of the piece you want to move."
     response = gets.chomp.split(" ")
     parse_input(response)
   end
@@ -55,5 +64,8 @@ class Checkers
 
     seq
   end
+end
 
+if __FILE__ == $PROGRAM_NAME
+  Checkers.new
 end
