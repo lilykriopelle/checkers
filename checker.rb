@@ -23,10 +23,9 @@ class Checker
     jumps.include?(target)
   end
 
-  # TO DO: reject if spot is occupied
   def valid_slides
     diffs = (color == :white ? SLIDES_DOWN : SLIDES_UP)
-    diffs.map { |d_row, d_col| [row+d_row, col+d_col] }
+    diffs.map { |(d_row, d_col)| [row+d_row, col+d_col] }
          .select {|new_pos| board.in_bounds(new_pos)}
          .select{|jump| board[jump].nil?}
   end
@@ -35,12 +34,19 @@ class Checker
     reachable_jumps.select{|jump| board[jump].nil?}
   end
 
-
-  # TO DO - reject jumps if space one away isn't occupied
   def reachable_jumps
     diffs = (color == :white ? JUMPS_DOWN : JUMPS_UP)
-    diffs.map { |d_row, d_col| [row+d_row, col+d_col] }
+    diffs.reject{|dir| adjacent_square_unoccupied_by_evemy(dir) }
+         .map { |(d_row, d_col)| [row+d_row, col+d_col] }
          .select {|new_pos| board.in_bounds(new_pos)}
+  end
+
+  def adjacent_square_unoccupied_by_evemy(dir)
+    board[adjacent_square(dir)].nil? || !enemy?(board[adjacent_square(dir)])
+  end
+
+  def adjacent_square(dir)
+    [row + (dir.first / 2), col + (dir.last / 2)]
   end
 
   # TO DO: render kings
