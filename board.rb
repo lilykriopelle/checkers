@@ -33,6 +33,10 @@ class Board
     @grid[pos.first][pos.last] = piece
   end
 
+  def display
+    puts render
+  end
+
   def render
     @grid.map do |row|
        row.map do |piece|
@@ -49,8 +53,7 @@ class Board
     render
   end
 
-  # MOVE TO BOARD
-  def in_bounds(pos)
+  def in_bounds?(pos)
     pos.first.between?(0,7) && pos.last.between?(0,7)
   end
 

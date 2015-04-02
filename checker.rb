@@ -15,19 +15,35 @@ class Checker
     @king = king
   end
 
-  def slide(target)
-    slides.include?(target)
+  def perform_slide(target)
+    valid_move = valid_slides.include?(target)
+    if valid_move
+      old_pos = position
+      self.position = target
+      self.board[old_pos] = nil
+      self.board[position] = self
+    end
+    maybe_promote
+
+    valid_move
   end
 
-  def jump(target)
-    jumps.include?(target)
+  def perform_jump(target)
+    valid_move = valid_jumps.include?(target)
+    if valid_move
+      position, board[position] = target, nil
+      # TODO remove jumped piece
+    end
+    maybe_promote
+
+    valid_move
   end
 
   def valid_slides
     diffs = (color == :white ? SLIDES_DOWN : SLIDES_UP)
-    diffs.map { |(d_row, d_col)| [row+d_row, col+d_col] }
-         .select {|new_pos| board.in_bounds(new_pos)}
-         .select{|jump| board[jump].nil?}
+    diffs.map{ |d_row, d_col| [row + d_row, col + d_col] }
+         .select{|new_pos| board.in_bounds?(new_pos)}
+         .reject{|new_pos| !board[new_pos].nil?}
   end
 
   def valid_jumps
@@ -36,12 +52,12 @@ class Checker
 
   def reachable_jumps
     diffs = (color == :white ? JUMPS_DOWN : JUMPS_UP)
-    diffs.reject{|dir| adjacent_square_unoccupied_by_evemy(dir) }
+    diffs.reject{|dir| adjacent_square_not_occupied_by_evemy(dir) }
          .map { |(d_row, d_col)| [row+d_row, col+d_col] }
-         .select {|new_pos| board.in_bounds(new_pos)}
+         .select {|new_pos| board.in_bounds?(new_pos)}
   end
 
-  def adjacent_square_unoccupied_by_evemy(dir)
+  def adjacent_square_not_occupied_by_evemy(dir)
     board[adjacent_square(dir)].nil? || !enemy?(board[adjacent_square(dir)])
   end
 
@@ -60,16 +76,8 @@ class Checker
     {white: "\u26C1", black: "\u26C3"}
   end
 
-  def occupied?(pos)
-    !board[pos].nil?
-  end
-
   def enemy?(other)
     color != other.color
-  end
-
-  def friend?(other)
-    color == other.color
   end
 
   def maybe_promote
