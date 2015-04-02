@@ -8,8 +8,8 @@ class Board
     place_pieces if set_up
   end
 
-  def win?(color)
-    @grid.flatten.compact.none?{|piece| piece.color == other_color(color)}
+  def loss?(color)
+    @grid.flatten.compact.all?{|piece| piece.color == other_color(color)}
   end
 
   def pieces(color)
@@ -41,6 +41,10 @@ class Board
     pos.first.between?(0,7) && pos.last.between?(0,7)
   end
 
+  def other_color(color)
+    color == :white ? :black : :white
+  end
+
   private
     def place_pieces
       (0..2).each do |row|
@@ -58,10 +62,6 @@ class Board
           Checker.new(self, color, [row,col])
         end
       end
-    end
-
-    def other_color(color)
-      color == :white ? :black : :white
     end
 
     def render

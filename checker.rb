@@ -24,9 +24,9 @@ class Checker
     error = move_error(moves)
 
     if error.is_a?(InvalidMoveError)
-      raise InvalidMoveError.new "That's an invalid move."
+      raise InvalidMoveError.new "\nThat's an invalid move."
     elsif error.is_a?(ForcedJumpError)
-      raise ForcedJumpError.new "You are forced to jump."
+      raise ForcedJumpError.new "\nYou are currently forced to jump."
     else
       perform_moves!(moves)
     end
@@ -34,6 +34,21 @@ class Checker
 
   def render
     symbols[color]
+  end
+
+  def valid_slides
+    diffs = get_slide_diffs
+    diffs.map{ |d_row, d_col| [row + d_row, col + d_col] }
+         .select{|new_pos| board.in_bounds?(new_pos)}
+         .reject{|new_pos| !board[new_pos].nil?}
+  end
+
+  def valid_jumps
+    reachable_jumps.select{|jump| board[jump].nil?}
+  end
+
+  def inspect
+    color
   end
 
   protected
@@ -57,17 +72,6 @@ class Checker
           end
         end
       end
-    end
-
-    def valid_slides
-      diffs = get_slide_diffs
-      diffs.map{ |d_row, d_col| [row + d_row, col + d_col] }
-           .select{|new_pos| board.in_bounds?(new_pos)}
-           .reject{|new_pos| !board[new_pos].nil?}
-    end
-
-    def valid_jumps
-      reachable_jumps.select{|jump| board[jump].nil?}
     end
 
   private
