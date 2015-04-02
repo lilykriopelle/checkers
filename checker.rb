@@ -21,18 +21,18 @@ class Checker
   end
 
   def perform_moves(moves)
-    move_error = valid_move_seq?(moves)
+    error = move_error(moves)
 
-    if move_error.is_a?(InvalidMoveError)
-      raise InvalidMoveError.new "Invalid move."
-    elsif move_error.is_a?(ForcedJumpError)
-      raise ForcedJumpError.new "Forced to jump."
+    if error.is_a?(InvalidMoveError)
+      raise InvalidMoveError.new "That's an invalid move."
+    elsif error.is_a?(ForcedJumpError)
+      raise ForcedJumpError.new "You are forced to jump."
     else
       perform_moves!(moves)
     end
   end
 
-  def valid_move_seq?(sequence)
+  def move_error(sequence)
     piece_clone = board.dup[position]
     begin
       piece_clone.perform_moves!(sequence)
@@ -41,7 +41,7 @@ class Checker
     rescue ForcedJumpError => e
       e
     else
-      true
+      nil
     end
   end
 
