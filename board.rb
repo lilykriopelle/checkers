@@ -1,4 +1,4 @@
-#require 'colorize'
+require 'colorize'
 
 class Board
 
@@ -37,20 +37,28 @@ class Board
     puts render
   end
 
-  def render
+  # def render
+  #
+  #   nums = ("1".."8").to_a
+  #   letts = ("a".."h").to_a
+  #   "   " + letts.join("  ") + "\n" +
+  #   @grid.map do |row|
+  #       nums.shift + " " + row.map do |piece|
+  #        if piece.nil?
+  #          " _ "
+  #        else
+  #          " #{piece.render} "
+  #        end
+  #      end.join("")
+  #    end.join("\n")
+  # end
 
-    nums = ("0".."7").to_a
+  def win?(color)
+    @grid.flatten.compact.none?{|piece| piece.color == other_color(color)}
+  end
 
-    "   " + nums.join("  ") + "\n" +
-    @grid.map do |row|
-        nums.shift + " " + row.map do |piece|
-         if piece.nil?
-           " _ "
-         else
-           " #{piece.render} "
-         end
-       end.join("")
-     end.join("\n")
+  def other_color(color)
+    color == :white ? :black : :white
   end
 
   def inspect
@@ -71,25 +79,25 @@ class Board
     new_board
   end
 
-  # def render
-  #    background = :gray
-  #    nums = ("1".."8").to_a
-  #
-  #    "   " + ('a'..'h').to_a.join("  ") + "\n" +
-  #    @grid.map do |row|
-  #      background == :white ? background = :gray : background = :white
-  #
-  #      (nums.shift + " ") + row.map do |piece|
-  #        background == :white ? background = :gray : background = :white
-  #
-  #        if piece.nil?
-  #          ("   ").colorize(:background => background)
-  #        else
-  #          (' ' + piece.render + ' ').colorize(:background => background)
-  #        end
-  #
-  #      end.join("")
-  #    end.join("\n")
-  #  end
+  def render
+     background = :gray
+     nums = ("1".."8").to_a
+
+     "   " + ('a'..'h').to_a.join("  ") + "\n" +
+     @grid.map do |row|
+       background == :white ? background = :gray : background = :white
+
+       (nums.shift + " ") + row.map do |piece|
+         background == :white ? background = :gray : background = :white
+
+         if piece.nil?
+           ("   ").colorize(:background => background)
+         else
+           (' ' + piece.render + ' ').colorize(:background => background)
+         end
+
+       end.join("")
+     end.join("\n")
+   end
 
 end

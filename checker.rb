@@ -1,5 +1,4 @@
 # coding: utf-8
-require_relative 'utilities.rb'
 
 class InvalidMoveError < StandardError; end
 
@@ -39,7 +38,7 @@ class Checker
   end
 
   def perform_moves!(sequence)
-    sequence = sequence
+    sequence = sequence.dup
     num_moves = sequence.size
     target = sequence.shift
 
@@ -136,13 +135,15 @@ class Checker
 
   # TO DO: render kings
   def render
-    color == :white ? "w" : "b"
-    #symbols[color]
+    symbols[color]
   end
 
   def symbols
-    {white: "\u26C0", black: "\u26C2"} unless king
-    {white: "\u26C1", black: "\u26C3"}
+    if king?
+      {white: '☆', black: '★'}
+    else
+      {white: '◎', black: '◉'}
+    end
   end
 
   def enemy?(other)
@@ -150,7 +151,9 @@ class Checker
   end
 
   def maybe_promote
-    king = true if at_last_row?
+    if at_last_row?
+      @king = true
+    end
   end
 
   def at_last_row?

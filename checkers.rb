@@ -1,19 +1,59 @@
 class Checkers
 
+  PLAYERS = [:white, :black]
+  COLS = {
+    "a" => 0,
+    "b" => 1,
+    "c" => 2,
+    "d" => 3,
+    "e" => 4,
+    "f" => 5,
+    "g" => 6,
+    "h" => 7
+  }
+
   def initialize
+    @board = Board.new
+    play
   end
 
   def play
 
-    loop do
-
-
-      switch_player(color)
+    PLAYERS.cycle do |player|
+      @board.display
+      take_turn(player)
+      break if @board.win?(player)
     end
-
   end
 
-  def switch_player(color)
+  def take_turn(color)
+    moves = get_sequence
+    checker = @board[moves.shift]
+
+    raise IOError.new "That's not your piece" unless checker.color == color
+
+    checker.perform_moves(moves)
+  end
+
+  def get_sequence
+    puts "Enter a move sequence, starting with the location of the piece you want to move."
+    response = gets.chomp.split(" ")
+    parse_input(response)
+  end
+
+  def parse_input(moves)
+    seq = []
+    moves.each do |move|
+      unless move.chars.size == 2
+        raise IOError.new "Moves should be a letter followed by a number"
+      end
+
+      row = move.chars.last.to_i
+      col = COLS[move.chars.first.downcase]
+      seq << [row-1, col]
+    end
+
+    seq
   end
 
 end
