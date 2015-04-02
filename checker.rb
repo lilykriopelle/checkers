@@ -140,11 +140,7 @@ class Checker
     end
 
     def symbols
-      if king?
-        {white: '☆', black: '★'}
-      else
-        {white: '◎', black: '◉'}
-      end
+     king? ? {white: '☆', black: '★'} : {white: '◎', black: '◉'}
     end
 
     def enemy?(other)
