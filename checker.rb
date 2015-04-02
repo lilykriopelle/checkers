@@ -1,4 +1,7 @@
-'encoding utf-8'
+# coding: utf-8
+require_relative 'utilities.rb'
+
+class InvalidMoveError < StandardError; end
 
 class Checker
   attr_accessor :color, :position, :board, :king
@@ -16,25 +19,41 @@ class Checker
     board[[row,col]] = self
   end
 
-  def valid_move_seq?
-    
+  def perform_moves(moves)
+    if valid_move_seq?(moves)
+      perform_moves!(moves)
+    else
+      raise InvalidMoveError.new "Invalid move."
+    end
+  end
 
+  def valid_move_seq?(sequence)
+    piece_clone = board.dup[position]
+    begin
+      piece_clone.perform_moves!(sequence)
+    rescue
+      return false
+    else
+      return true
+    end
   end
 
   def perform_moves!(sequence)
+    sequence = sequence
     num_moves = sequence.size
     target = sequence.shift
-    moved = true
 
     if num_moves == 1
-      moved = (perform_slide(target) || perform_jump(target))
+
+      unless (perform_slide(target) || perform_jump(target))
+        raise InvalidMoveError.new "Invalid move"
+      end
     else
-      until target.nil? || !moved
-        raise IOError unless perform_jump(target)
+      until target.nil?
+        raise InvalidMoveError.new "Invalid move" unless perform_jump(target)
         target = sequence.shift
       end
     end
-    moved
   end
 
   def perform_slide(target)
@@ -74,7 +93,7 @@ class Checker
   end
 
   def valid_slides
-    diffs = (color == :white ? SLIDES_DOWN : SLIDES_UP)
+    diffs = get_slide_diffs #(color == :white ? SLIDES_DOWN : SLIDES_UP)
     diffs.map{ |d_row, d_col| [row + d_row, col + d_col] }
          .select{|new_pos| board.in_bounds?(new_pos)}
          .reject{|new_pos| !board[new_pos].nil?}
@@ -85,7 +104,7 @@ class Checker
   end
 
   def reachable_jumps
-    diffs = (color == :white ? JUMPS_DOWN : JUMPS_UP)
+    diffs = get_jump_diffs #(color == :white ? JUMPS_DOWN : JUMPS_UP)
     diffs.reject{|dir| adjacent_square_not_occupied_by_evemy(dir) }
          .map { |(d_row, d_col)| [row+d_row, col+d_col] }
          .select {|new_pos| board.in_bounds?(new_pos)}
@@ -97,6 +116,22 @@ class Checker
 
   def adjacent_square(dir)
     [row + (dir.first / 2), col + (dir.last / 2)]
+  end
+
+  def get_jump_diffs
+    if king?
+      diffs = JUMPS_DOWN + JUMPS_UP
+    else
+      diffs = (color == :white ? JUMPS_DOWN : JUMPS_UP)
+    end
+  end
+
+  def get_slide_diffs
+    if king?
+      diffs = SLIDES_DOWN + SLIDES_UP
+    else
+      diffs = (color == :white ? SLIDES_DOWN : SLIDES_UP)
+    end
   end
 
   # TO DO: render kings
